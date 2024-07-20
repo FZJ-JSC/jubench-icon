@@ -5,29 +5,29 @@ message: >-
 authors:
   - given-names: Catrin I.
     family-names: Meyer
-    affiliation: Forschunsgzentrum Jülich, Jülich Supercomputing Centre
+    affiliation: Forschungszentrum Jülich, Jülich Supercomputing Centre
     orcid: 'https://orcid.org/0000-0002-9271-6174'
   - given-names: Nils
     family-names: Nobre Wittwer
-    affiliation: Forschunsgzentrum Jülich, Jülich Supercomputing Centre
+    affiliation: Forschungszentrum Jülich, Jülich Supercomputing Centre
   - given-names: Manoel
     family-names: Römmer
-    affiliation: Forschunsgzentrum Jülich, Jülich Supercomputing Centre
+    affiliation: Forschungszentrum Jülich, Jülich Supercomputing Centre
     orcid: 'https://orcid.org/0009-0007-3513-5932'
   - given-names: Andreas
     family-names: Herten
-    affiliation: Forschunsgzentrum Jülich, Jülich Supercomputing Centre
+    affiliation: Forschungszentrum Jülich, Jülich Supercomputing Centre
     orcid: 'https://orcid.org/0000-0002-7150-2505'
   - given-names: Olaf
     family-names: Stein
-    affiliation: Forschunsgzentrum Jülich, Jülich Supercomputing Centre
+    affiliation: Forschungszentrum Jülich, Jülich Supercomputing Centre
     orcid: 'https://orcid.org/0000-0002-6684-7103'
   - given-names: Abhiraj 
     family-names: Bishnoi
-    affiliation: Forschunsgzentrum Jülich, Jülich Supercomputing Centre
+    affiliation: Forschungszentrum Jülich, Jülich Supercomputing Centre
   - given-names: Sebastian
     family-names: Achilles
-    affiliation: Forschunsgzentrum Jülich, Jülich Supercomputing Centre
+    affiliation: Forschungszentrum Jülich, Jülich Supercomputing Centre
     orcid: 'https://orcid.org/0000-0002-1943-6803'
 abstract: "The ICON benchmark of the JUPITER Benchmark Suite"
 identifiers:
