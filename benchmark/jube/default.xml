@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jube>
+	<benchmark name="ICONbench" outpath="run"> 
+	
+		<parameterset name="systemParameter" init_with="platform.xml">
+			<parameter name="nodes" type="int" tag="R02B04">2</parameter>
+			<parameter name="nodes" type="int" tag="R02B06">5</parameter>
+			<parameter name="nodes" type="int" tag="R02B07">5</parameter>
+			<parameter name="nodes" type="int" tag="R02B09">120</parameter>
+			<parameter name="nodes" type="int" tag="R02B10">300</parameter>
+
+			<parameter name="grid" type="int" tag="R02B04">1</parameter>
+			<parameter name="grid" type="int" tag="R02B06">5</parameter>
+			<parameter name="grid" type="int" tag="R02B07">2</parameter>			
+			<parameter name="grid" type="int" tag="R02B09">3</parameter>
+			<parameter name="grid" type="int" tag="R02B10">4</parameter>
+
+			<parameter name="nproma" tag="R02B04">5510</parameter>
+			<parameter name="nproma" tag="R02B06">21402</parameter>
+			<parameter name="nproma" tag="R02B07">83752</parameter>			
+			<parameter name="nproma" tag="R02B09">68575</parameter>
+			<parameter name="nproma" tag="R02B10">108680</parameter>
+
+			<parameter name="rrtmpg" tag="R02B04">5500</parameter>
+			<parameter name="rrtmpg" tag="R02B06">20000</parameter>
+			<parameter name="rrtmpg" tag="R02B07">18000</parameter>			
+			<parameter name="rrtmpg" tag="R02B09">12000</parameter>
+			<parameter name="rrtmpg" tag="R02B10">8000</parameter>
+
+			<parameter name="build_config">juwels_booster.gpu.ompi_nvhpc-24.1</parameter>
+			<parameter name="executable">${jube_benchmark_rundir}/${jube_wp_padid}_execute/work/benchmark${nodes}nodes.run</parameter>
+			<parameter name="account">jscbenchmark</parameter>
+			<parameter name="queue">booster</parameter>
+			<parameter name="gres">gpu:4</parameter>
+			<parameter name="env" seperator=";">module load Stages/2024; module use /p/usersoftware/slmet/easybuild/stages/2024/easybuild/juwelsbooster/modules/all/Core; module load NVHPC/24.1 OpenMPI/4.1.6 netCDF-Fortran ecCodes UCX-settings/RC-CUDA Python </parameter>
+			<parameter name="rundir">${jube_benchmark_rundir}</parameter>
+			<parameter name="icondatadir">${jube_benchmark_home}/../../src/data</parameter>
+			<parameter name="iconinputdir">/p/fastdata/slmet/slmet111/model_data/ICON/</parameter>
+		</parameterset>
+
+		<parameterset name="executeset" init_with="platform.xml">
+			<parameter name="starter">bash</parameter>
+		</parameterset>
+
+
+		<fileset name="runscript">
+			<copy>${jube_benchmark_home}/exp.exabench_gpu.run</copy>
+			<copy>${jube_benchmark_home}/../aux/add_*</copy>
+		</fileset>
+
+		<fileset name="evaluation">
+			<copy>${jube_benchmark_home}/../aux/evaluate.py</copy>
+		</fileset>
+
+		<substituteset name="substitution">
+			<iofile in="exp.exabench_gpu.run" out="${jube_benchmark_rundir}/${jube_wp_padid}_execute/work/benchmark${nodes}nodes.run"/>
+			<sub source="#NODES#" dest="$nodes" />
+			<sub source="#NPROMA#" dest="$nproma" />
+			<sub source="#RRTMGPCHUNK#" dest="$rrtmpg"/>
+			<sub source="#GRID#" dest="$grid"/>
+			<sub source="#QUEUE#" dest="$queue"/>
+			<sub source="#OUT#" dest="$output"/>
+			<sub source="#RUNDIR#" dest="$rundir"/>
+			<sub source="#ICONDIR#" dest ="$icondatadir"/>
+			<sub source="#INPUTDIR#" dest="$iconinputdir"/>
+		</substituteset>
+
+		<step name="build" shared="shared">
+			<use>systemParameter</use>
+			<do shared="true">${jube_benchmark_home}/../../src/icon/config/jsc/${build_config}; make -j8</do>
+		</step>
+
+		<step name="execute" >
+			<use>runscript</use>
+			<use>systemParameter</use>
+			<use>substitution</use>
+			<use>executeset</use>
+		  	<use from="platform.xml">jobfiles</use>
+			<use from="platform.xml">executesub</use>
+		  	<do done_file="$done_file">$submit $submit_script </do>
+		</step>
+		<step name="evaluate" depend="execute">
+			  <use>evaluation</use>
+			  <do> ml Python </do>
+			  <do> python ${jube_benchmark_rundir}/${jube_wp_padid}_evaluate/work/evaluate.py ${jube_benchmark_rundir}/ ${grid} ${jube_wp_id}</do>
+		</step>
+
+		<patternset name="pat">
+			<pattern name="node" mode="pattern" type="int">\+ no_of_nodes=${jube_pat_int}</pattern>
+			<pattern name="min_integrate_nh" unit="s" mode="pattern" type="float">0:?${jube_pat_bl}L integrate_nh${jube_pat_bl}${jube_pat_nint}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_fp}</pattern>
+			<pattern name="max_integrate_nh" unit="s" mode="pattern" type="float">0:?${jube_pat_bl}L integrate_nh${jube_pat_bl}${jube_pat_nint}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_fp}</pattern>
+			<pattern name="total" unit="s" mode="pattern" type="float">0:?${jube_pat_bl}total${jube_pat_bl}(\n0:)?${jube_pat_nint}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_fp}</pattern> 
+			<pattern name="min_exch_data" unit="s" mode="pattern" type="float">0:?${jube_pat_bl}exch_data${jube_pat_bl}${jube_pat_nint}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_fp}</pattern>
+			<pattern name="max_exch_data" unit="s" mode="pattern" type="float">0:?${jube_pat_bl}exch_data${jube_pat_bl}(\n0:)?${jube_pat_nint}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_nwrd}(\n0:)?${jube_pat_bl}(\n0:)?${jube_pat_fp}</pattern>
+		<pattern name="min_wrt_output" unit="s" mode="pattern" type="float">[1-9]\d*:${jube_pat_bl}wrt_output${jube_pat_bl}${jube_pat_nint}${jube_pat_bl}${jube_pat_nwrd}${jube_pat_bl}${jube_pat_nwrd}${jube_pat_bl}${jube_pat_nwrd}${jube_pat_bl}${jube_pat_fp}</pattern>
+		<pattern name="max_wrt_output" unit="s" mode="pattern" type="float">[1-9]\d*:${jube_pat_bl}wrt_output${jube_pat_bl}${jube_pat_nint}${jube_pat_bl}${jube_pat_nwrd}${jube_pat_bl}${jube_pat_nwrd}${jube_pat_bl}${jube_pat_nwrd}${jube_pat_bl}${jube_pat_nwrd}${jube_pat_bl}${jube_pat_fp}</pattern>
+		</patternset>
+
+		<patternset name="verify">
+			<pattern name="_ok" mode="pattern" type="str">successfully</pattern>
+			<pattern name="ok" mode="python" type="bools" default='False'>'$_ok' == 'successfully'</pattern>
+		</patternset>
+
+		<analyser name="analyse_time">
+			<analyse step="execute">
+				<file use="pat">job.err</file>
+	  		</analyse>
+			<analyse step="evaluate">
+				<file use="verify">evaluation.out</file>
+	  		</analyse>
+		</analyser>
+
+
+		<result>
+			<use> analyse_time</use>
+			<table name="result" style="pretty" sort="tasks">
+				<column title="Nodes">nodes</column>
+				<column title="total">total</column>
+				<column title="intnhmin">min_integrate_nh</column>
+				<column title="intnhmax">max_integrate_nh</column>
+				<column title="exch_data_min">min_exch_data</column>
+				<column title="exch_data_max">max_exch_data</column>
+				<column title="wrt_output_min">min_wrt_output</column>
+				<column title="wrt_output_max">max_wrt_output</column>
+				<column title="valid">ok</column>
+	  		</table>
+		</result>
+	</benchmark>
+</jube>

@@ -1,0 +1,96 @@
+#!/bin/bash
+
+set -eu
+ulimit -c 0
+
+script_dir=$(cd "$(dirname "$0")"; pwd)
+icon_dir=$(cd "${script_dir}/../.."; pwd)
+
+
+BUILD_ENV="module purge; module load Stages/2024; module use /p/usersoftware/slmet/easybuild/stages/2024/easybuild/juwelsbooster/modules/all/Core; module load NVHPC/24.1-CUDA-12 OpenMPI/4.1.6 ecCodes netCDF-Fortran CMake;"
+eval $BUILD_ENV
+module list
+
+
+HDF5_LIBS='-lhdf5_hl -lhdf5'
+NETCDF_LIBS='-lnetcdf'
+NETCDFF_LIBS='-lnetcdff'
+BLAS_LAPACK_LIBS='-llapack -lblas'
+ECCODES_LIBS='-leccodes'
+FYAML_LIBS='' #'-lfyaml'
+
+XML2_ROOT='$EBROOTLIBXML2'
+XML2_LIBS='-lxml2'
+
+################################################################################
+
+
+CC="mpicc"
+CFLAGS='-g -O2'
+
+# Let YAC find LAPACK with the C compiler:
+ICON_YAC_CFLAGS='-fortranlibs'
+
+CPPFLAGS="-I${EBROOTECCODES}/include -I${EBROOTHDF5}/include -I${EBROOTNETCDF}/include -I${EBROOTNETCDFMINFORTRAN}/include -I${EBROOTLIBXML2}/include/libxml2"
+
+FC="mpif90"
+FCFLAGS="-I${EBROOTECCODES}/include -I${EBROOTHDF5}/include -I${EBROOTNETCDF}/include -I${EBROOTNETCDFMINFORTRAN}/include -g -O2 -Mrecursive -Mallocatable=03 -Mstack_arrays -Minfo=accel,inline -acc=gpu,verystrict -gpu=cc80"
+
+# CUDA compiler must be from the same prefix as the Fortran compiler:
+CUDACXX='nvcc'
+CUDAFLAGS='-arch=sm_80 -g -O3'
+
+# Make FC and CUDACXX agree on the CUDA version (installation) to use:
+#BUILD_ENV+=" export CUDA_HOME=\"$(cd "$(dirname "${CUDACXX}")/../../cuda"; pwd)\";"
+
+LDFLAGS="-c++libs -cuda -nvmalloc -L${EBROOTECCODES}/lib64 -L${EBROOTECCODES}/lib -L${EBROOTHDF5}/lib -L${EBROOTPNETCDF}/lib -L${EBROOTNETCDF}/lib -L${EBROOTNETCDFMINFORTRAN}/lib -L${EBROOTLIBXML2}/lib64 -L${EBROOTGCCCORE}/lib64"
+LIBS="-Wl,--as-needed ${XML2_LIBS} ${FYAML_LIBS} ${ECCODES_LIBS} ${BLAS_LAPACK_LIBS} ${NETCDFF_LIBS} ${NETCDF_LIBS} ${HDF5_LIBS}"
+
+MPI_LAUNCH=false
+
+EXTRA_CONFIG_ARGS='--disable-loop-exchange --enable-mpi --enable-gpu --enable-mpi-gpu --enable-realloc-buf --enable-pgi-inlib --enable-grib2 --enable-yaxt --disable-coupling'
+
+# The compiler fails one of the YAC configure-time tests, which we suppress and
+# hope for the best:
+EXTRA_CONFIG_ARGS+=' yac_cv_fc_is_contiguous_works=yes'
+
+EXTRA_CONFIG_ARGS+=' --disable-mpi-checks'
+
+################################################################################
+
+"${icon_dir}/configure" \
+BUILD_ENV="${BUILD_ENV}" \
+CC="${CC}" \
+CFLAGS="${CFLAGS}" \
+CPPFLAGS="${CPPFLAGS}" \
+CUDACXX="${CUDACXX}" \
+CUDAFLAGS="${CUDAFLAGS}" \
+FC="${FC}" \
+FCFLAGS="${FCFLAGS}" \
+ICON_YAC_CFLAGS="${ICON_YAC_CFLAGS}" \
+LDFLAGS="${LDFLAGS}" \
+LIBS="${LIBS}" \
+MPI_LAUNCH="${MPI_LAUNCH}" \
+${EXTRA_CONFIG_ARGS} \
+"$@"
+
+for arg in "$@"; do
+  case $arg in
+    -help | --help | --hel | --he | -h | -help=r* | --help=r* | --hel=r* | --he=r* | -hr* | -help=s* | --help=s* | --hel=s* | --he=s* | -hs*)
+      test -n "${EXTRA_CONFIG_ARGS}" && echo '' && echo "This wrapper script ('$0') calls the configure script with the following extra arguments, which might override the default values listed above: ${EXTRA_CONFIG_ARGS}"
+      exit 0 ;;
+  esac
+done
+
+# Copy runscript-related files when building out-of-source:
+if test $(pwd) != $(cd "${icon_dir}"; pwd); then
+  echo "Copying runscript input files from the source directory..."
+  rsync -uavz ${icon_dir}/run . --exclude='*.in' --exclude='.*' --exclude='standard_*'
+  ln -sf -t run/ ${icon_dir}/run/standard_*
+  ln -sf set-up.info run/SETUP.config
+  rsync -uavz ${icon_dir}/externals . --exclude='.git' --exclude='*.f90' --exclude='*.F90' --exclude='*.c' --exclude='*.h' --exclude='*.Po' --exclude='tests' --exclude='*.mod' --exclude='*.o'
+  rsync -uavz ${icon_dir}/make_runscripts .
+  rsync -uavz ${icon_dir}/scripts .
+  ln -sf ${icon_dir}/data
+  ln -sf ${icon_dir}/vertical_coord_tables
+fi
