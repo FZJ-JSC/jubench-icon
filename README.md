@@ -10,3 +10,4 @@ This repository contains the ICON benchmark. [`DESCRIPTION.md`](DESCRIPTION.md) 
 
 The ICON benchmark provides a global forecast simulation in model resolution R02B09 (5 km grid point distance) and R02B10 (2.5 km grid point distance). 
 
+The source code of ICON is included in the `./src/` subdirectory as a submodule from the ICON repository at [gitlab.dkrz.de/icon/icon-model](https://gitlab.dkrz.de/icon/icon-model).
