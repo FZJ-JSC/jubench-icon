@@ -1,4 +1,0 @@
-[submodule "src/icon"]
-	path = src/icon
-	url = https://gitlab.dkrz.de/icon/icon-model.git
-	branch = release-2024.01-public
