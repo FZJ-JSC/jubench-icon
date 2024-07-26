@@ -48,7 +48,7 @@ While ICON can also be built to run on CPUs, this benchmark is made for the ICON
 
 ICON depends on other packages: NVIDIA HPC SDK, OpenMPI, netCDF-Fortran, Python, CUDA, ecCodes, CMake.
 
-On JUWELS Booster, the following modules have been loaded: NVHPC/24.1-CUDA-12 OpenMPI/4.1.6 ecCodes/2.31.0 netCDF-Fortran/4.9.2 CMake/3.26.3
+On JUWELS Booster, the following modules are used by the benchmark: NVHPC/24.1-CUDA-12 OpenMPI/4.1.6 ecCodes/2.31.0 netCDF-Fortran/4.9.2 CMake/3.26.3. They do not need to be loaded manually, but are automatically loaded through the JUBE script. In case of manual execution, please add the following module search path to your environment: `module use /p/usersoftware/slmet/easybuild/stages/2024/easybuild/juwelsbooster/modules/all/Core/`.
 
 ### Configuration
 
