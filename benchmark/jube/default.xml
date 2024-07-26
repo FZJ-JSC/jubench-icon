@@ -35,7 +35,7 @@
 			<parameter name="env" seperator=";">module load Stages/2024; module use /p/usersoftware/slmet/easybuild/stages/2024/easybuild/juwelsbooster/modules/all/Core; module load NVHPC/24.1 OpenMPI/4.1.6 netCDF-Fortran ecCodes UCX-settings/RC-CUDA Python </parameter>
 			<parameter name="rundir">${jube_benchmark_rundir}</parameter>
 			<parameter name="icondatadir">${jube_benchmark_home}/../../src/data</parameter>
-			<parameter name="iconinputdir">/p/fastdata/slmet/slmet111/model_data/ICON/</parameter>
+			<parameter name="iconinputdir">/p/data1/slmet/model_data/ICON</parameter>
 		</parameterset>
 
 		<parameterset name="executeset" init_with="platform.xml">

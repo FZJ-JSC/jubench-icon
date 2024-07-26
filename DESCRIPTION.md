@@ -37,8 +37,9 @@ In addition, further datasets for smaller test cases are provided for evaluation
 
 The ICON benchmark is delivered as `icon-bench.tar.gz`. The input data is delivered separately as `icon-dataset.tar.gz`; the sample datasets are provided in `icon-dataset-sample.tar.gz`.
 
-The 2024.01 open source release of ICON is available in this repostiory as a git submodule in the direcotry `src/icon`.
+The 2024.01 open source release of ICON is available in this repostiory as a git submodule in the direcotry `src/icon`, **as a git submodule**. Make sure to either recursively clone this repository, or to use the `git submodule init`  and `git submodule update` commands.
 An up-to-date build configuration wrapper for JUWELS Booster is also provided with `src/juwels_booster.gpu.ompi_nvhpc-24.1`, as well as a patch to build ICON version `2024.01` for GPUs with `src/2024.01-lzacc_undefined.patch`.
+
 
 
 ## Building
@@ -58,6 +59,11 @@ The configure file for JUWELS Booster is provided in `src/juwels_booster.gpu.omp
 ### Patching
 
 To build the ICON 2024.01 release for GPUs, you will need to apply the patch `src/2024.01-lzacc_undefined.patch` to the ICON releae in `src/icon/`.
+
+```
+$ cd src/icon
+$ patch -p1 < ../2024.01-lzacc_undefined.patch
+```
 
 ### Compilation
 
